@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 
+//main runs by default as in most languages
 void main() {
-  runApp(MyApp());
+  //builds and runs "ArkadiaAdministrationApp" class below
+  runApp(ArkadiaAdministrationApp());
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+//main app class - a stateless widget is one that doesn't change and doesn't need much interaction, but they can hold stateful
+//  widgets (which are the opposite) so it's fine as a baseline widget
+class ArkadiaAdministrationApp extends StatelessWidget {
+  //build function returns the bottom level widget for the app - everything that shows on the screen is a widget basically
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Arkadia Administration',
+      //everything inside of this ThemeData object were auto-generated and the comments may be useful later
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -26,50 +31,70 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: GameCabinet(),
+      //set "home" point as a GameCabinets widget, shown below
+      home: GameCabinets(),
     );
   }
 }
 
-class GameCabinet extends StatefulWidget {
-  const GameCabinet() : super();
+//end of default app building stuff
+///////////////////////////////////////////////////////////////////
+//beginning of important GameCabinets widget stuff
 
+//stateful widget nesting within main stateless widget
+class GameCabinets extends StatefulWidget {
+  //super simple constructor; by default had Key parameters but idk what that is yet
+  const GameCabinets() : super();
+
+  //oh you want your stateful widget to do something? cool, create a state for it
   @override
-  _GameCabinetState createState() => _GameCabinetState();
+  _GameCabinetsState createState() => _GameCabinetsState();
 }
 
-class _GameCabinetState extends State<GameCabinet> {
-  final List<String> _suggestions = ["Pacman", "Mappy"];
+//you rang?
+//an underscore at the beginning of a name forces it to be private in dart
+class _GameCabinetsState extends State<GameCabinets> {
+  //list of cabinet names - to be replaced with an API call and a list of objects containing a name, image, and status
+  final List<String> _cabinetList = ["Pacman", "Mappy"];
+  //text stylization
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
+  //default build constructor
   @override
   Widget build(BuildContext context){
+    //returns a scaffold object, which is like a whole screen structure
     return Scaffold(
       appBar: AppBar(
         title: const Text("Arkadia Administration")
       ),
-      body: _buildSuggestions()
+      //grabs the widget for the body from this _buildCabinets function
+      body: _buildCabinets()
     );
   }
 
-  Widget _buildSuggestions(){
+  // function to build the widget that contains the cabinet row objects
+  Widget _buildCabinets(){
+    //default logic as you'd see in other languages to build a list of widgets based on the list of strings we had earlier
     List<Widget> cabinets = new List<Widget>();
-    for(int i = 0; i < _suggestions.length; i++){
-      cabinets.add(_buildRow(_suggestions[i]));
-      if(i != _suggestions.length - 1){
+    for(int i = 0; i < _cabinetList.length; i++){
+      cabinets.add(_buildRow(_cabinetList[i]));
+      if(i != _cabinetList.length - 1){
         cabinets.add(Divider());
       }
     }
+    //return a ListView object that contains all those widgets just built
     return ListView(
       children: cabinets,
       padding: EdgeInsets.all(16.0)
     );
   }
 
+  //function to build a single row widget from a string - again, will need changed when each row has more than a string in it
   Widget _buildRow(String cabinet){
     return ListTile(
       title: Text(
         cabinet,
+        //apply the style from earlier to the text in each row
         style: _biggerFont,
       ),
     );
