@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'gamecabinets.dart';
 
 class CabinetRow extends StatefulWidget {
   String cabinetName;
@@ -30,25 +31,38 @@ class _CabinetRowState extends State<CabinetRow> {
     var iconType = cabinetIsWorking ? Icons.check : Icons.do_not_disturb_alt;
     var iconColor = cabinetIsWorking ? Colors.green[600] : Colors.red;
     String iconLabel = cabinetIsWorking ? "Working" : "Not Working";
-    return Row(
-      children: <Widget>[
-        Expanded(
-          flex: 9,
-          child: Text(
-            cabinetName,
-            style: _biggerFont
+    return Container(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            flex: 85,
+            child: Text(
+              cabinetName,
+              style: _biggerFont
+            )
+          ),
+          Expanded(
+            flex: 15,
+            child: ElevatedButton(
+              child: Icon(
+                iconType,
+                color: iconColor,
+                size: 18.0,
+                semanticLabel: iconLabel,
+              ),
+              onPressed: (){
+                setState((){
+                  cabinetIsWorking = GameCabinetListManager.updateListItem(cabinetName);
+                });
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.white54)
+              )
+            )
           )
-        ),
-        Expanded(
-          flex: 1,
-          child: Icon(
-            iconType,
-            color: iconColor,
-            size: 18.0,
-            semanticLabel: iconLabel,
-          )
-        )
-      ],
+        ],
+      ),
+      width: 200
     );
   }
 }
