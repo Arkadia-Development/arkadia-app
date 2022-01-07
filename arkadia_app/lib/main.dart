@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'cabinetrow.dart';
 
@@ -26,7 +28,7 @@ class ArkadiaAdministrationApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        primaryColor: Colors.indigo[800],
         // This makes the visual density adapt to the platform that you run
         // the app on. For desktop platforms, the controls will be smaller and
         // closer together (more dense) than on mobile platforms.
@@ -67,7 +69,25 @@ class _GameCabinetsState extends State<GameCabinets> {
     //returns a scaffold object, which is like a whole screen structure
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Arkadia Administration")
+        title: Center(
+          heightFactor: 1.0,
+          child: Column(
+            children: [
+              Image.asset(
+                "assets\\arkadia_logo_raw.png",
+                height: 30
+              ),
+              Text(
+                "administration",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: "Comic Sans MS",
+                  fontSize: 12
+                )
+              )
+            ],
+          ),
+        )
       ),
       //grabs the widget for the body from this _buildCabinets function
       body: _buildCabinets()
