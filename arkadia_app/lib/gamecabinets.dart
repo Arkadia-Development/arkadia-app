@@ -20,7 +20,25 @@ class _GameCabinetsState extends State<GameCabinets> {
     //returns a scaffold object, which is like a whole screen structure
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Arkadia Administration")
+        title: Center(
+          heightFactor: 1.0,
+          child: Column(
+            children: [
+              Image.asset(
+                "assets\\arkadia_logo_raw.png",
+                height: 30
+              ),
+              Text(
+                "administration",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: "Comic Sans MS",
+                  fontSize: 12
+                )
+              )
+            ],
+          ),
+        )
       ),
       //grabs the widget for the body from this _buildCabinets function
       body: _buildCabinets()
