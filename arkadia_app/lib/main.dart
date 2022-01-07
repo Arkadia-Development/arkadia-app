@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'cabinetrow.dart';
+import 'gamecabinets.dart';
 
 //main runs by default as in most languages
 void main() {
@@ -34,70 +34,6 @@ class ArkadiaAdministrationApp extends StatelessWidget {
       ),
       //set "home" point as a GameCabinets widget, shown below
       home: GameCabinets(),
-    );
-  }
-}
-
-//end of default app building stuff
-///////////////////////////////////////////////////////////////////
-//beginning of important GameCabinets widget stuff
-
-//stateful widget nesting within main stateless widget
-class GameCabinets extends StatefulWidget {
-  //super simple constructor; by default had Key parameters but idk what that is yet
-  const GameCabinets() : super();
-
-  //oh you want your stateful widget to do something? cool, create a state for it
-  @override
-  _GameCabinetsState createState() => _GameCabinetsState();
-}
-
-//you rang?
-//an underscore at the beginning of a name forces it to be private in dart
-class _GameCabinetsState extends State<GameCabinets> {
-  //list of cabinets - to be replaced with an API call and a list of objects containing a name, image, and status
-  var _cabinetList = {
-    "Pacman" : false,
-    "Mappy" : true
-  };
-
-  //default build constructor
-  @override
-  Widget build(BuildContext context){
-    //returns a scaffold object, which is like a whole screen structure
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Arkadia Administration")
-      ),
-      //grabs the widget for the body from this _buildCabinets function
-      body: _buildCabinets()
-    );
-  }
-
-  // function to build the widget that contains the cabinet row objects
-  Widget _buildCabinets(){
-    //default logic as you'd see in other languages to build a list of widgets based on the list of strings we had earlier
-    List<Widget> cabinets = new List<Widget>();
-    for(var cabinet in _cabinetList.entries){
-      cabinets.add(_buildRow(cabinet.key, cabinet.value));
-      if(cabinet != _cabinetList.entries.last){
-        cabinets.add(Divider());
-      }
-    }
-    //return a ListView object that contains all those widgets just built
-    return ListView(
-      children: cabinets,
-      padding: EdgeInsets.all(16.0)
-    );
-  }
-
-  //function to build a single row widget from a string - again, will need changed when each row has more than a string in it
-  Widget _buildRow(String cabinet, bool working){
-    return ListTile(
-      title: CabinetRow(
-        cabinet,
-        working
-      ),
     );
   }
 }
