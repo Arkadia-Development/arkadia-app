@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'cabinetrow.dart';
 
 //main runs by default as in most languages
 void main() {
@@ -54,10 +55,11 @@ class GameCabinets extends StatefulWidget {
 //you rang?
 //an underscore at the beginning of a name forces it to be private in dart
 class _GameCabinetsState extends State<GameCabinets> {
-  //list of cabinet names - to be replaced with an API call and a list of objects containing a name, image, and status
-  final List<String> _cabinetList = ["Pacman", "Mappy"];
-  //text stylization
-  final _biggerFont = const TextStyle(fontSize: 18.0);
+  //list of cabinets - to be replaced with an API call and a list of objects containing a name, image, and status
+  var _cabinetList = {
+    "Pacman" : false,
+    "Mappy" : true
+  };
 
   //default build constructor
   @override
@@ -76,9 +78,9 @@ class _GameCabinetsState extends State<GameCabinets> {
   Widget _buildCabinets(){
     //default logic as you'd see in other languages to build a list of widgets based on the list of strings we had earlier
     List<Widget> cabinets = new List<Widget>();
-    for(int i = 0; i < _cabinetList.length; i++){
-      cabinets.add(_buildRow(_cabinetList[i]));
-      if(i != _cabinetList.length - 1){
+    for(var cabinet in _cabinetList.entries){
+      cabinets.add(_buildRow(cabinet.key, cabinet.value));
+      if(cabinet != _cabinetList.entries.last){
         cabinets.add(Divider());
       }
     }
@@ -90,12 +92,11 @@ class _GameCabinetsState extends State<GameCabinets> {
   }
 
   //function to build a single row widget from a string - again, will need changed when each row has more than a string in it
-  Widget _buildRow(String cabinet){
+  Widget _buildRow(String cabinet, bool working){
     return ListTile(
-      title: Text(
+      title: CabinetRow(
         cabinet,
-        //apply the style from earlier to the text in each row
-        style: _biggerFont,
+        working
       ),
     );
   }
