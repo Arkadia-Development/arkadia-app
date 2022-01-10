@@ -25,7 +25,7 @@ class _GameCabinetsState extends State<GameCabinets> {
           child: Column(
             children: [
               Image.asset(
-                "assets\\arkadia_logo_raw.png",
+                "assets/arkadia_logo_raw.png",
                 height: 30
               ),
               Text(
