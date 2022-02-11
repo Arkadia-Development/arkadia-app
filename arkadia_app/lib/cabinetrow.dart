@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'gamecabinets.dart';
 
 class CabinetRow extends StatefulWidget {
+  String cabinetId;
   String cabinetName;
   bool cabinetIsWorking;
-  CabinetRow(String name, bool isWorking){
+  CabinetRow(String id, String name, bool isWorking){
+    cabinetId = id;
     cabinetName = name;
     cabinetIsWorking = isWorking;
   }
 
   @override
-  _CabinetRowState createState() => _CabinetRowState(cabinetName, cabinetIsWorking);
+  _CabinetRowState createState() => _CabinetRowState(cabinetId, cabinetName, cabinetIsWorking);
 }
 
 class _CabinetRowState extends State<CabinetRow> {
+  String cabinetId;
   String cabinetName;
   bool cabinetIsWorking;
 
@@ -21,7 +24,8 @@ class _CabinetRowState extends State<CabinetRow> {
   final _biggerFont = const TextStyle(fontSize: 18.0);
   
   @override
-  _CabinetRowState(String name, bool isWorking){
+  _CabinetRowState(String id, String name, bool isWorking){
+    cabinetId = id;
     cabinetName = name;
     cabinetIsWorking = isWorking;
   }
@@ -50,10 +54,15 @@ class _CabinetRowState extends State<CabinetRow> {
                 size: 18.0,
                 semanticLabel: iconLabel,
               ),
-              onPressed: (){
-                setState((){
-                  cabinetIsWorking = GameCabinetListManager.updateListItem(cabinetName);
-                });
+              onPressed: () async {
+                cabinetIsWorking = await GameCabinetListManager.updateListItem(cabinetId)
+                  .then((bool works){
+                    setState(() {
+                      iconType = works ? Icons.check : Icons.do_not_disturb_alt;
+                      iconColor = works ? Colors.green[600] : Colors.red;
+                    });
+                    return works;
+                  });
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.white54)
