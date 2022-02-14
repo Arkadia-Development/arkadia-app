@@ -29,7 +29,7 @@ class _CabinetRowState extends State<CabinetRow> {
   @override
   Widget build(BuildContext context) {
     var iconType = cabinetIsWorking ? Icons.check : Icons.do_not_disturb_alt;
-    var iconColor = cabinetIsWorking ? Colors.green[600] : Colors.red;
+    var iconColor = cabinetIsWorking ? Colors.green[800] : Colors.red;
     String iconLabel = cabinetIsWorking ? "Working" : "Not Working";
     return Container(
       child: Row(
