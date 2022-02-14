@@ -105,6 +105,7 @@ class GameCabinetListManager {
           for(var cab in jsonDecode(response.body)){
             list.add(Cabinet.fromJson(cab));
           }
+          list.sort((a, b) => a.fullTitle.compareTo(b.fullTitle));
           cabinetList = list;
         }
         else{
