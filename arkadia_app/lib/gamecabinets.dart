@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'cabinetrow.dart';
+import 'secret.dart';
 
 //stateful widget nesting within main stateless widget
 class GameCabinets extends StatefulWidget {
@@ -46,28 +51,43 @@ class _GameCabinetsState extends State<GameCabinets> {
   }
 
   // function to build the widget that contains the cabinet row objects
-  Widget _buildCabinets(){
-    //default logic as you'd see in other languages to build a list of widgets based on the list of strings we had earlier
-    List<Widget> cabinets = new List<Widget>();
-    for(var cabinet in GameCabinetListManager.cabinetList.entries){
-      if(cabinet.key != null){
-        cabinets.add(_buildRow(cabinet.key, cabinet.value));
-        if(cabinet != GameCabinetListManager.cabinetList.entries.last){
-          cabinets.add(Divider());
+  Widget _buildCabinets() {
+    //return a FutureBuilder object that contains all the cabinet info
+    return FutureBuilder(
+      builder: (BuildContext context, AsyncSnapshot snapshot){
+        if(snapshot.connectionState == ConnectionState.waiting){
+          return Center(
+            child: CircularProgressIndicator()
+          );
+        } else if(snapshot.hasData){
+          List<Widget> cabinets = new List<Widget>();
+          for(var cabinet in GameCabinetListManager.cabinetList){
+            if(cabinet.id != null){
+              cabinets.add(_buildRow(cabinet.id, cabinet.fullTitle, cabinet.isWorking));
+              if(cabinet != GameCabinetListManager.cabinetList[GameCabinetListManager.cabinetList.length - 1]){
+                cabinets.add(Divider());
+              }
+            }
+          }
+          return ListView(
+            children: cabinets,
+            padding: EdgeInsets.all(16.0)
+          );
+        } else if(snapshot.hasError){
+          return Text("ERROR: ${snapshot.error}");
+        } else{
+          return Text("No data");
         }
-      }
-    }
-    //return a ListView object that contains all those widgets just built
-    return ListView(
-      children: cabinets,
-      padding: EdgeInsets.all(16.0)
+      },
+      future: GameCabinetListManager.getCabinetList()
     );
   }
 
-  //function to build a single row widget from a string - again, will need changed when each row has more than a string in it
-  Widget _buildRow(String cabinet, bool working){
+  //function to build a single row widget from a string and bool
+  Widget _buildRow(String id, String name, bool working){
     return CabinetRow(
-      cabinet,
+      id,
+      name,
       working,
     );
   }
@@ -76,16 +96,58 @@ class _GameCabinetsState extends State<GameCabinets> {
 class GameCabinetListManager {
   GameCabinetListManager();
 
-  //list of cabinets - to be replaced with an API call and a list of objects containing a name, image, and status
-  static var cabinetList = <String, bool>{
-    "Pacman" : false,
-    "Mappy" : true
-  };
+  static List<Cabinet> cabinetList;
+  static Future<List<Cabinet>> getCabinetList() async {
+    return await http.get(Uri.parse('http://localhost:8080/GetAllGameStatuses'))
+      .then((Response response) {
+        if(response.statusCode == 200){
+          List<Cabinet> list = List<Cabinet>();
+          for(var cab in jsonDecode(response.body)){
+            list.add(Cabinet.fromJson(cab));
+          }
+          cabinetList = list;
+        }
+        else{
+          throw Exception("Failed to retrieve game statuses");
+        }
+        return cabinetList;
+      });
+  }
 
-  static Function updateListItem = (String cabinet){
-    if(cabinetList.containsKey(cabinet)){
-      cabinetList.update(cabinet, (val) => !val);
-      return cabinetList[cabinet];
+  static Future<bool> updateListItem(String cabinet) async {
+    return await http.get(Uri.parse('http://localhost:8080/SwitchGameStatus?id=' + cabinet + '&secret=' + Secrets.updateSecret))
+      .then((Response response) async {
+        return await getCabinetList()
+          .then((List<Cabinet> list){
+            for(var cab in list){
+              if(cab.id == cabinet){
+                return cab.isWorking;
+              }
+            }
+            return false;
+          });
+      });
+  }
+}
+
+class Cabinet {
+  String id;
+  String fullTitle;
+  bool isWorking;
+  List<dynamic> searchTerms;
+
+  Cabinet(String id, String fullTitle, bool isWorking, List<dynamic> searchTerms){
+    this.id = id;
+    this.fullTitle = fullTitle;
+    this.isWorking = isWorking;
+    List<String> termlist = List<String>();
+    for(String s in searchTerms){
+      termlist.add(s);
     }
-  };
+    this.searchTerms = termlist;
+  }
+
+  factory Cabinet.fromJson(Map<String, dynamic> json){
+    return Cabinet(json['id'], json['fullTitle'], json['isWorking'],json['searchTerms']);
+  }
 }
