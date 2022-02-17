@@ -19,9 +19,24 @@ class GameCabinets extends StatefulWidget {
 //you rang?
 //an underscore at the beginning of a name forces it to be private in dart
 class _GameCabinetsState extends State<GameCabinets> {
+  TextField searchBar;
+  List<Cabinet> displayCabs = new List<Cabinet>();
+
   //default build constructor
   @override
   Widget build(BuildContext context){
+    searchBar = TextField(
+      onChanged: (String val) {
+        setState((){
+          GameCabinetListManager.searchCabinetList(val);
+        });
+      },
+    );
+
+    Widget mainWidget = _buildCabinets();
+
+    // if(displayCabs != null) print(displayCabs[0].fullTitle);
+
     //returns a scaffold object, which is like a whole screen structure
     return Scaffold(
       appBar: AppBar(
@@ -46,13 +61,48 @@ class _GameCabinetsState extends State<GameCabinets> {
         )
       ),
       //grabs the widget for the body from this _buildCabinets function
-      body: _buildCabinets()
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            Row(
+              children: [
+                SizedBox(
+                  width: 10,
+                  height: 20
+                ),
+                Icon(Icons.search),
+                SizedBox(
+                  width: 10,
+                  height: 20
+                ),
+                Expanded(
+                  child: searchBar
+                ),
+                SizedBox(
+                  width: 20,
+                  height: 20
+                )
+              ],
+            ),
+            Expanded(
+              child: mainWidget
+            ,)
+          ],
+          mainAxisSize: MainAxisSize.max,
+        ),
+      ),
     );
   }
 
   // function to build the widget that contains the cabinet row objects
   Widget _buildCabinets() {
     //return a FutureBuilder object that contains all the cabinet info
+    bool hasData = GameCabinetListManager.filteredCabinetList != null;
+    displayCabs = hasData ? GameCabinetListManager.filteredCabinetList : null;
+    return hasData ? _buildRowsFromExistingCabinets() : _getFutureBuilder();
+  }
+
+  FutureBuilder _getFutureBuilder(){
     return FutureBuilder(
       builder: (BuildContext context, AsyncSnapshot snapshot){
         if(snapshot.connectionState == ConnectionState.waiting){
@@ -60,17 +110,12 @@ class _GameCabinetsState extends State<GameCabinets> {
             child: CircularProgressIndicator()
           );
         } else if(snapshot.hasData){
-          List<Widget> cabinets = new List<Widget>();
-          for(var cabinet in GameCabinetListManager.cabinetList){
-            if(cabinet.id != null){
-              cabinets.add(_buildRow(cabinet.id, cabinet.fullTitle, cabinet.isWorking));
-              if(cabinet != GameCabinetListManager.cabinetList[GameCabinetListManager.cabinetList.length - 1]){
-                cabinets.add(Divider());
-              }
-            }
-          }
-          return ListView(
-            children: cabinets,
+          displayCabs = GameCabinetListManager.filteredCabinetList;
+          return ListView.builder(
+            itemCount: displayCabs.length,
+            itemBuilder: (BuildContext context, int ind){
+              return _buildRow(displayCabs[ind].id, displayCabs[ind].fullTitle, displayCabs[ind].isWorking);
+            },
             padding: EdgeInsets.all(16.0)
           );
         } else if(snapshot.hasError){
@@ -81,6 +126,20 @@ class _GameCabinetsState extends State<GameCabinets> {
       },
       future: GameCabinetListManager.getCabinetList()
     );
+  }
+
+  ListView _buildRowsFromExistingCabinets(){
+    displayCabs = GameCabinetListManager.filteredCabinetList;
+    print(displayCabs[0].fullTitle);
+    return ListView.builder(
+      key: ValueKey(displayCabs),
+      itemCount: displayCabs.length,
+      itemBuilder: (BuildContext context, int ind){
+        Widget item = _buildRow(displayCabs[ind].id, displayCabs[ind].fullTitle, displayCabs[ind].isWorking);
+        return item;
+      },
+      padding: EdgeInsets.all(16.0)
+    ); 
   }
 
   //function to build a single row widget from a string and bool
@@ -97,8 +156,10 @@ class GameCabinetListManager {
   GameCabinetListManager();
 
   static List<Cabinet> cabinetList;
+  static List<Cabinet> filteredCabinetList;
+
   static Future<List<Cabinet>> getCabinetList() async {
-    return await http.get(Uri.parse('http://localhost:8080/GetAllGameStatuses'))
+    return await http.get(Uri.parse('https://arkadia-site-api.herokuapp.com/GetAllGameStatuses'))
       .then((Response response) {
         if(response.statusCode == 200){
           List<Cabinet> list = List<Cabinet>();
@@ -107,6 +168,7 @@ class GameCabinetListManager {
           }
           list.sort((a, b) => a.fullTitle.compareTo(b.fullTitle));
           cabinetList = list;
+          filteredCabinetList = list;
         }
         else{
           throw Exception("Failed to retrieve game statuses");
@@ -116,7 +178,7 @@ class GameCabinetListManager {
   }
 
   static Future<bool> updateListItem(String cabinet) async {
-    return await http.get(Uri.parse('http://localhost:8080/SwitchGameStatus?id=' + cabinet + '&secret=' + Secrets.updateSecret))
+    return await http.get(Uri.parse('https://arkadia-site-api.herokuapp.com/SwitchGameStatus?id=' + cabinet + '&secret=' + Secrets.updateSecret))
       .then((Response response) async {
         return await getCabinetList()
           .then((List<Cabinet> list){
@@ -128,6 +190,33 @@ class GameCabinetListManager {
             return false;
           });
       });
+  }
+
+  static List<Cabinet> searchCabinetList(String param){
+    if(param.isEmpty){
+      filteredCabinetList = cabinetList;
+      return filteredCabinetList;
+    }
+    List<String> params = param.split(" ");
+    while(params.remove(""));
+    filteredCabinetList = new List<Cabinet>.from(cabinetList);
+    if(params.isEmpty) return filteredCabinetList;
+
+    for(Cabinet cab in cabinetList){
+      bool fits = false;
+      for(String term in cab.searchTerms){
+        for(String p in params){
+          if(term.contains(p.toLowerCase())){
+            fits = true;
+            // break;
+          }
+        }
+        // if(fits) break;
+      }
+      if(!fits) filteredCabinetList.remove(cab);
+    }
+
+    return filteredCabinetList;
   }
 }
 
