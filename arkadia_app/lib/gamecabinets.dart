@@ -35,8 +35,6 @@ class _GameCabinetsState extends State<GameCabinets> {
 
     Widget mainWidget = _buildCabinets();
 
-    // if(displayCabs != null) print(displayCabs[0].fullTitle);
-
     //returns a scaffold object, which is like a whole screen structure
     return Scaffold(
       appBar: AppBar(
@@ -137,7 +135,6 @@ class _GameCabinetsState extends State<GameCabinets> {
         )
       );
     }
-    print(displayCabs[0].fullTitle);
     return ListView.builder(
       key: ValueKey(displayCabs),
       itemCount: displayCabs.length,
@@ -200,27 +197,23 @@ class GameCabinetListManager {
   }
 
   static List<Cabinet> searchCabinetList(String param){
-    if(param.isEmpty){
-      filteredCabinetList = cabinetList;
-      return filteredCabinetList;
-    }
     List<String> params = param.split(" ");
+    for(int i = 0; i < params.length; i++) params[i] = params[i].replaceAll(RegExp("[^A-Za-z0-9]"), "");
     while(params.remove(""));
     filteredCabinetList = new List<Cabinet>.from(cabinetList);
     if(params.isEmpty) return filteredCabinetList;
 
+    List<bool> containsParams = new List<bool>(params.length);
     for(Cabinet cab in cabinetList){
-      bool fits = false;
-      for(String term in cab.searchTerms){
-        for(String p in params){
-          if(term.contains(p.toLowerCase())){
-            fits = true;
-            // break;
+      for(int i = 0; i < containsParams.length; i++) containsParams[i] = false;
+      for(int j = 0; j < params.length; j++){
+        for(String term in cab.searchTerms){
+          if(term.contains(params[j].toLowerCase())){
+            containsParams[j] = true;
           }
         }
-        // if(fits) break;
       }
-      if(!fits) filteredCabinetList.remove(cab);
+      if(!containsParams.every((element) => element)) filteredCabinetList.remove(cab);
     }
 
     return filteredCabinetList;
