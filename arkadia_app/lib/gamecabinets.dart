@@ -35,8 +35,6 @@ class _GameCabinetsState extends State<GameCabinets> {
 
     Widget mainWidget = _buildCabinets();
 
-    // if(displayCabs != null) print(displayCabs[0].fullTitle);
-
     //returns a scaffold object, which is like a whole screen structure
     return Scaffold(
       appBar: AppBar(
@@ -137,7 +135,6 @@ class _GameCabinetsState extends State<GameCabinets> {
         )
       );
     }
-    print(displayCabs[0].fullTitle);
     return ListView.builder(
       key: ValueKey(displayCabs),
       itemCount: displayCabs.length,
