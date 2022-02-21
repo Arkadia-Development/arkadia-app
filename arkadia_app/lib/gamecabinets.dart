@@ -128,8 +128,15 @@ class _GameCabinetsState extends State<GameCabinets> {
     );
   }
 
-  ListView _buildRowsFromExistingCabinets(){
+  Widget _buildRowsFromExistingCabinets(){
     displayCabs = GameCabinetListManager.filteredCabinetList;
+    if(displayCabs.isEmpty){
+      return Center(
+        child: Text(
+          "No cabinets found"
+        )
+      );
+    }
     print(displayCabs[0].fullTitle);
     return ListView.builder(
       key: ValueKey(displayCabs),
