@@ -77,7 +77,30 @@ class _GameCabinetsState extends State<GameCabinets> {
                   child: searchBar
                 ),
                 SizedBox(
-                  width: 20,
+                  width: 10,
+                  height: 20
+                ),
+                SizedBox(
+                  width: 35,
+                  height: 35,
+                  child: ElevatedButton(
+                    child: Icon(
+                      Icons.add,
+                      color: Colors.black,
+                      size: 18.0,
+                      semanticLabel: "Add cabinet",
+                    ),
+                    onPressed: () async {
+                      
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(Colors.white54),
+                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero)
+                    )
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
                   height: 20
                 )
               ],
@@ -163,7 +186,7 @@ class GameCabinetListManager {
   static List<Cabinet> filteredCabinetList;
 
   static Future<List<Cabinet>> getCabinetList() async {
-    return await http.get(Uri.parse('https://arkadia-site-api.herokuapp.com/GetAllGameStatuses'))
+    return await http.get(Uri.parse('http://192.168.1.70:8080/GetAllGameStatuses'))
       .then((Response response) {
         if(response.statusCode == 200){
           List<Cabinet> list = List<Cabinet>();
@@ -182,7 +205,7 @@ class GameCabinetListManager {
   }
 
   static Future<bool> updateListItem(String cabinet) async {
-    return await http.get(Uri.parse('https://arkadia-site-api.herokuapp.com/SwitchGameStatus?id=' + cabinet + '&secret=' + Secrets.updateSecret))
+    return await http.get(Uri.parse('http://192.168.1.70:8080/SwitchGameStatus?id=' + cabinet + '&secret=' + Secrets.updateSecret))
       .then((Response response) async {
         return await getCabinetList()
           .then((List<Cabinet> list){

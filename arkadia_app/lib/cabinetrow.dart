@@ -39,14 +39,41 @@ class _CabinetRowState extends State<CabinetRow> {
       child: Row(
         children: <Widget>[
           Expanded(
-            flex: 85,
+            flex: 70,
             child: Text(
               cabinetName,
               style: _biggerFont
             )
           ),
+          Expanded(flex: 5, child: SizedBox.shrink()),
           Expanded(
-            flex: 15,
+            flex: 10,
+            child: ElevatedButton(
+              child: Icon(
+                Icons.edit,
+                color: Colors.black,
+                size: 18.0,
+                semanticLabel: "Edit",
+              ),
+              onPressed: () async {
+                cabinetIsWorking = await GameCabinetListManager.updateListItem(cabinetId)
+                  .then((bool works){
+                    setState(() {
+                      iconType = works ? Icons.check : Icons.do_not_disturb_alt;
+                      iconColor = works ? Colors.green[600] : Colors.red;
+                    });
+                    return works;
+                  });
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.white54),
+                padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero)
+              )
+            )
+          ),
+          Expanded(flex: 5, child: SizedBox.shrink()),
+          Expanded(
+            flex: 10,
             child: ElevatedButton(
               child: Icon(
                 iconType,
@@ -65,7 +92,8 @@ class _CabinetRowState extends State<CabinetRow> {
                   });
               },
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.white54)
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.white54),
+                padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero)
               )
             )
           )
