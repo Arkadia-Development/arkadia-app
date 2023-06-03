@@ -241,11 +241,15 @@ class GameCabinetListManager {
       for(int i = 0; i < params.length; i++){
         for(String term in cab.searchTerms){
           if(term.contains(params[i].toLowerCase())){
+            print(term + ' contains ' + params[i].toLowerCase());
             containsParams[i] = true;
           }
         }
       }
-      if(!containsParams.every((element) => element)) filteredCabinetList.remove(cab);
+      if(!containsParams.every((element) => element)) {
+        filteredCabinetList.removeAt(filteredCabinetList.indexWhere((cabinet) => cabinet.id == cab.id));
+      }
+      containsParams = new List<bool>.filled(params.length, false);
     }
 
     return filteredCabinetList;
