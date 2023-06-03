@@ -83,14 +83,14 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
           child: Column(
             children: [
               Image.asset(
-                "assets/arkadia_logo_raw.png",
+                'assets/arkadia_logo_raw.png',
                 height: 30
               ),
               Text(
-                (cabinetIsNew ? "add" : "edit") + " cabinet",
+                (cabinetIsNew ? 'add' : 'edit') + ' cabinet',
                 style: TextStyle(
                   color: Colors.white,
-                  fontFamily: "Comic Sans MS",
+                  fontFamily: 'Comic Sans MS',
                   fontSize: 12
                 )
               )
@@ -129,7 +129,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                 isWorking ? Icons.check : Icons.do_not_disturb_alt,
                 color: isWorking ? Colors.green[700] : Colors.red,
                 size: 18.0,
-                semanticLabel: isWorking ? "Working" : "Not Working",
+                semanticLabel: isWorking ? 'Working' : 'Not Working',
               ),
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.white54),
@@ -156,9 +156,9 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                     },
                     child: Text(
                       (banner != null
-                        ? "Replace banner"
-                        : "Select banner")
-                      + " (PNG files only)"
+                        ? 'Replace banner'
+                        : 'Select banner')
+                      + ' (PNG files only)'
                     ),
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(Colors.white54)
@@ -169,8 +169,8 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                 Expanded(
                   flex: 35,
                   child: banner != null
-                    ? banner ?? Text("Image error")
-                    : Text("No image selected")
+                    ? banner ?? Text('Image error')
+                    : Text('No image selected')
                 ),
                 Expanded(flex: 5, child: SizedBox.shrink())
               ],

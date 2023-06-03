@@ -37,7 +37,7 @@ class _CabinetRowState extends State<CabinetRow> {
   Widget build(BuildContext context) {
     var iconType = cabinetIsWorking ? Icons.check : Icons.do_not_disturb_alt;
     var iconColor = cabinetIsWorking ? Colors.green[700] : Colors.red;
-    String iconLabel = cabinetIsWorking ? "Working" : "Not Working";
+    String iconLabel = cabinetIsWorking ? 'Working' : 'Not Working';
     return Container(
       child: Row(
         children: <Widget>[
@@ -56,7 +56,7 @@ class _CabinetRowState extends State<CabinetRow> {
                 Icons.edit,
                 color: Colors.black,
                 size: 18.0,
-                semanticLabel: "Edit",
+                semanticLabel: 'Edit',
               ),
               onPressed: () async {
                 Navigator.push(

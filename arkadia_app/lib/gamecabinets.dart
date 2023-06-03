@@ -52,14 +52,14 @@ class _GameCabinetsState extends State<GameCabinets> {
           child: Column(
             children: [
               Image.asset(
-                "assets/arkadia_logo_raw.png",
+                'assets/arkadia_logo_raw.png',
                 height: 30
               ),
               Text(
-                "administration",
+                'administration',
                 style: TextStyle(
                   color: Colors.white,
-                  fontFamily: "Comic Sans MS",
+                  fontFamily: 'Comic Sans MS',
                   fontSize: 12
                 )
               )
@@ -97,7 +97,7 @@ class _GameCabinetsState extends State<GameCabinets> {
                       Icons.add,
                       color: Colors.black,
                       size: 18.0,
-                      semanticLabel: "Add cabinet",
+                      semanticLabel: 'Add cabinet',
                     ),
                     onPressed: () {
                       Navigator.push(
@@ -154,9 +154,9 @@ class _GameCabinetsState extends State<GameCabinets> {
             padding: EdgeInsets.all(16.0)
           );
         } else if(snapshot.hasError){
-          return Text("ERROR: ${snapshot.error}");
+          return Text('ERROR: ${snapshot.error}');
         } else{
-          return Text("No data");
+          return Text('No data');
         }
       },
       future: GameCabinetListManager.getCabinetList()
@@ -168,7 +168,7 @@ class _GameCabinetsState extends State<GameCabinets> {
     if(displayCabs == null || (displayCabs?.isEmpty ?? true)){
       return Center(
         child: Text(
-          "No cabinets found"
+          'No cabinets found'
         )
       );
     }
@@ -208,7 +208,7 @@ class GameCabinetListManager {
           filteredCabinetList = list;
         }
         else{
-          throw Exception("Failed to retrieve game statuses");
+          throw Exception('Failed to retrieve game statuses');
         }
         return cabinetList;
       });
@@ -230,9 +230,9 @@ class GameCabinetListManager {
   }
 
   static List<Cabinet> searchCabinetList(String param){
-    List<String> params = param.split(" ");
-    for(int i = 0; i < params.length; i++) params[i] = params[i].replaceAll(RegExp("[^A-Za-z0-9]"), "");
-    while(params.remove(""));
+    List<String> params = param.split(' ');
+    for(int i = 0; i < params.length; i++) params[i] = params[i].replaceAll(RegExp('[^A-Za-z0-9]'), '');
+    while(params.remove(''));
     filteredCabinetList = new List<Cabinet>.from(cabinetList);
     if(params.isEmpty) return filteredCabinetList;
 
