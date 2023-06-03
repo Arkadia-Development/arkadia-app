@@ -241,7 +241,6 @@ class GameCabinetListManager {
       for(int i = 0; i < params.length; i++){
         for(String term in cab.searchTerms){
           if(term.contains(params[i].toLowerCase())){
-            print(term + ' contains ' + params[i].toLowerCase());
             containsParams[i] = true;
           }
         }
