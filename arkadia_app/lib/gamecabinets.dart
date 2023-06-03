@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
@@ -23,6 +22,7 @@ class _GameCabinetsState extends State<GameCabinets> {
   TextField searchBar = TextField();
   List<Cabinet>? displayCabs = new List<Cabinet>.empty(growable: true);
   Widget mainWidget = Text('');
+  TextEditingController defaultController = TextEditingController(text: '');
 
   //default build constructor
   @override
@@ -33,10 +33,12 @@ class _GameCabinetsState extends State<GameCabinets> {
           GameCabinetListManager.searchCabinetList(val);
         });
       },
+      controller: searchBar.controller ?? defaultController
     );
 
     void stateSetter () {
       GameCabinetListManager.filteredCabinetList = List.empty();
+      searchBar.controller?.text = '';
       setState(() { mainWidget = _buildCabinets(stateSetter); });
     };
 
@@ -147,7 +149,7 @@ class _GameCabinetsState extends State<GameCabinets> {
           return ListView.builder(
             itemCount: displayCabs?.length,
             itemBuilder: (BuildContext context, int ind){
-              return _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, []), stateSetter);
+              return _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, [], null), stateSetter);
             },
             padding: EdgeInsets.all(16.0)
           );
@@ -174,7 +176,7 @@ class _GameCabinetsState extends State<GameCabinets> {
       key: ValueKey(displayCabs),
       itemCount: displayCabs?.length,
       itemBuilder: (BuildContext context, int ind){
-        Widget item = _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, []), stateSetter);
+        Widget item = _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, [], null), stateSetter);
         return item;
       },
       padding: EdgeInsets.all(16.0)
@@ -255,9 +257,10 @@ class Cabinet {
   String fullTitle = '';
   bool isWorking = true;
   List<dynamic> searchTerms = List<String>.empty(growable: true);
-  File? banner;
+  Image? banner;
+  String? bannerSrc;
 
-  Cabinet(String id, String fullTitle, bool isWorking, List<dynamic> searchTerms){
+  Cabinet(String id, String fullTitle, bool isWorking, List<dynamic> searchTerms, String? banner){
     this.id = id;
     this.fullTitle = fullTitle;
     this.isWorking = isWorking;
@@ -266,9 +269,13 @@ class Cabinet {
       termlist.add(s);
     }
     this.searchTerms = termlist;
+    if (banner != null) {
+      this.banner = Image.memory(base64Decode(banner));
+      this.bannerSrc = banner;
+    }
   }
 
   factory Cabinet.fromJson(Map<String, dynamic> json){
-    return Cabinet(json['id'], json['fullTitle'], json['isWorking'],json['searchTerms']);
+    return Cabinet(json['id'], json['fullTitle'], json['isWorking'], json['searchTerms'], json['banner']);
   }
 }

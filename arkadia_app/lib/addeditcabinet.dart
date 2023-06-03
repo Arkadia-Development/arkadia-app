@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'gamecabinets.dart';
-import 'cabinetrow.dart';
 import 'secret.dart';
 
+// ignore: must_be_immutable
 class AddEditCabinet extends StatefulWidget {
   Cabinet? editingCabinet;
 
@@ -32,7 +33,9 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
   TextField publisherField = TextField();
   TextEditingController _publisherController = TextEditingController();
   bool isWorking = true;
-  File? banner;
+  Image? banner;
+  String? bannerPath;
+  String? banner64Src;
 
   _AddEditCabinetState(Cabinet? cabinet) : super() {
     if (cabinet != null) {
@@ -50,6 +53,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
 
       isWorking = cabinet.isWorking;
       banner = cabinet.banner;
+      banner64Src = cabinet.bannerSrc;
     } else {
       cabinetIsNew = true;
       _titleController = new TextEditingController(text: '');
@@ -142,7 +146,10 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                     onPressed: () async {
                       FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
                       if (result != null) {
-                        setState(() { banner = File(result.files.single.path ?? ''); });
+                        setState(() {
+                          banner = Image.file(File(result.files.single.path ?? ''));
+                          bannerPath = result.files.single.path;  
+                        });
                       } else {
                         setState(() { banner = null; });
                       }
@@ -162,7 +169,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                 Expanded(
                   flex: 35,
                   child: banner != null
-                    ? Image.file(banner ?? File(''))
+                    ? banner ?? Text("Image error")
                     : Text("No image selected")
                 ),
                 Expanded(flex: 5, child: SizedBox.shrink())
@@ -177,14 +184,18 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                 lowerCaseTitle.split(' ').forEach((el) { searchTerms.add(el); });
                 searchTerms.add(publisher.replaceAll(RegExp(r'[^0-9a-z\s]', caseSensitive: false), ' ').toLowerCase());
 
-                List<int> bannerBytes = banner?.readAsBytesSync() ?? [];
+                Uint8List bannerBytes = bannerPath != null
+                  ? await File(bannerPath ?? '').readAsBytes()
+                  : Uint8List.fromList([]);
 
                 var gameStatus = json.encode({
                   'id': cabinetIsNew ? searchTerms[0] : originalId,
                   'fullTitle': title,
                   'isWorking': isWorking,
                   'searchTerms': searchTerms,
-                  'banner': !bannerBytes.isEmpty ? base64Encode(bannerBytes) : null
+                  'banner': !bannerBytes.isEmpty
+                    ? base64.encode(bannerBytes)
+                    : banner64Src
                 });
 
                 if (cabinetIsNew) {

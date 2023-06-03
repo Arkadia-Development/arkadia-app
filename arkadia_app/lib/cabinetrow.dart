@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'gamecabinets.dart';
 import 'addeditcabinet.dart';
 
+// ignore: must_be_immutable
 class CabinetRow extends StatefulWidget {
-  Cabinet cabinet = Cabinet('', '', true, []);
+  Cabinet cabinet = Cabinet('', '', true, [], null);
   final void Function() stateSetter;
 
   CabinetRow(Cabinet givenCabinet, this.stateSetter){
@@ -18,7 +19,7 @@ class _CabinetRowState extends State<CabinetRow> {
   String cabinetId = '';
   String cabinetName = '';
   bool cabinetIsWorking = true;
-  Cabinet rawCabinet = Cabinet('', '', true, []);
+  Cabinet rawCabinet = Cabinet('', '', true, [], null);
   final void Function() stateSetter;
 
   //text stylization
