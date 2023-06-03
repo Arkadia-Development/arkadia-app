@@ -23,6 +23,7 @@ class AddEditCabinet extends StatefulWidget {
 class _AddEditCabinetState extends State<AddEditCabinet> {
   bool cabinetIsNew = true;
   String originalId = '';
+  String deleteButtonText = 'DELETE CABINET';
 
   String title = '';
   TextField titleField = TextField();
@@ -165,6 +166,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
               Expanded(flex: 5, child: SizedBox.shrink())
             ],
           ),
+          SizedBox(width: 20, height: 40),
           ElevatedButton(
             onPressed: () async {
               List<String> searchTerms = List<String>.empty(growable: true);
@@ -214,7 +216,6 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                       );
                       Navigator.pop(context);
                     } else {
-                      print(response.body);
                       Fluttertoast.showToast(
                         msg: 'Failed to update cabinet (HTTP status ' + response.statusCode.toString() + ')'
                       );
@@ -225,6 +226,36 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
             child: Text((cabinetIsNew ? 'Add' : 'Update') + ' Cabinet'),
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all<Color>(Colors.white54)
+            )
+          ),
+          SizedBox(width: 20, height: 80),
+          cabinetIsNew ? SizedBox(width: 20, height: 20) : ElevatedButton(
+            onPressed: () async {
+              if (deleteButtonText == 'DELETE CABINET') {
+                setState(() { deleteButtonText = 'TAP AGAIN TO CONFIRM'; });
+                Future.delayed(const Duration(milliseconds: 2000), () {
+                  setState(() { deleteButtonText = 'DELETE CABINET'; });
+                });
+              } else {
+                await http.delete(
+                  Uri.parse(Secrets.host + '/DeleteGameStatus?id=' + originalId + '&secret=' + Secrets.updateSecret)
+                ).then((Response response) {
+                  if (response.statusCode == 200) {
+                      Fluttertoast.showToast(
+                        msg: 'Cabinet deleted successfully'
+                      );
+                      Navigator.pop(context);
+                    } else {
+                      Fluttertoast.showToast(
+                        msg: 'Failed to delete cabinet (HTTP status ' + response.statusCode.toString() + ')'
+                      );
+                    }
+                });
+              }
+            },
+            child: Text(deleteButtonText),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all<Color>(Colors.red.shade700)
             )
           )
         ],
