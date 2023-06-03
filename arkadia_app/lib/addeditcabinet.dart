@@ -114,11 +114,11 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                 flex: 35,
                 child: ElevatedButton(
                   onPressed: () async {
-                    FilePickerResult? result = await FilePicker.platform.pickFiles();
+                    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
                     if (result != null) {
-                      banner = File(result.files.single.path ?? '');
+                      setState(() { banner = File(result.files.single.path ?? ''); });
                     } else {
-                      banner = null;
+                      setState(() { banner = null; });
                     }
                   },
                   child: Text(
@@ -145,79 +145,5 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
         ],
       )
     );
-  }
-
-  FutureBuilder _getUserFileFutureBuilder() {
-    return FutureBuilder(
-      builder: (BuildContext context, AsyncSnapshot snapshot){
-        print(snapshot);
-        return Text("No image selected");
-      },
-      future: FilePicker.platform.pickFiles()
-    );
-  }
-}
-
-class CabinetFormManager {
-  CabinetFormManager();
-
-  static List<Cabinet> cabinetList = List<Cabinet>.empty(growable: true);
-  static List<Cabinet> filteredCabinetList = List<Cabinet>.empty(growable: true);
-
-  static Future<List<Cabinet>> getCabinetList() async {
-    return await http.get(Uri.parse('http://192.168.1.70:8080/GetAllGameStatuses'))
-      .then((Response response) {
-        if(response.statusCode == 200){
-          List<Cabinet> list = List<Cabinet>.empty(growable: true);
-          for(var cab in jsonDecode(response.body)){
-            list.add(Cabinet.fromJson(cab));
-          }
-          list.sort((a, b) => a.fullTitle.compareTo(b.fullTitle));
-          cabinetList = list;
-          filteredCabinetList = list;
-        }
-        else{
-          throw Exception("Failed to retrieve game statuses");
-        }
-        return cabinetList;
-      });
-  }
-
-  static Future<bool> updateListItem(String cabinet) async {
-    return await http.get(Uri.parse('http://192.168.1.70:8080/SwitchGameStatus?id=' + cabinet + '&secret=' + Secrets.updateSecret))
-      .then((Response response) async {
-        return await getCabinetList()
-          .then((List<Cabinet> list){
-            for(var cab in list){
-              if(cab.id == cabinet){
-                return cab.isWorking;
-              }
-            }
-            return false;
-          });
-      });
-  }
-
-  static List<Cabinet> searchCabinetList(String param){
-    List<String> params = param.split(" ");
-    for(int i = 0; i < params.length; i++) params[i] = params[i].replaceAll(RegExp("[^A-Za-z0-9]"), "");
-    while(params.remove(""));
-    filteredCabinetList = new List<Cabinet>.from(cabinetList);
-    if(params.isEmpty) return filteredCabinetList;
-
-    List<bool> containsParams = new List<bool>.filled(params.length, false);
-    for(Cabinet cab in cabinetList){
-      for(int i = 0; i < containsParams.length; i++) containsParams[i] = false;
-      for(int j = 0; j < params.length; j++){
-        for(String term in cab.searchTerms){
-          if(term.contains(params[j].toLowerCase())){
-            containsParams[j] = true;
-          }
-        }
-      }
-      if(!containsParams.every((element) => element)) filteredCabinetList.remove(cab);
-    }
-
-    return filteredCabinetList;
   }
 }
