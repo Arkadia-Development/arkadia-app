@@ -33,7 +33,11 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
     if (cabinet != null) {
       cabinetIsNew = false;
       _titleController = new TextEditingController(text: cabinet.fullTitle);
-      _publisherController = new TextEditingController(text: cabinet.searchTerms[cabinet.searchTerms.length - 1].toString());
+      _publisherController = new TextEditingController(
+        text: cabinet.searchTerms.length > 0
+          ? cabinet.searchTerms[cabinet.searchTerms.length - 1].toString()
+          : ''
+      );
       isWorking = cabinet.isWorking;
       banner = cabinet.banner;
     } else {

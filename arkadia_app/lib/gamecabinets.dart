@@ -136,7 +136,7 @@ class _GameCabinetsState extends State<GameCabinets> {
           return ListView.builder(
             itemCount: displayCabs?.length,
             itemBuilder: (BuildContext context, int ind){
-              return _buildRow(displayCabs?[ind].id ?? '', displayCabs?[ind].fullTitle ?? '', displayCabs?[ind].isWorking ?? false);
+              return _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, []));
             },
             padding: EdgeInsets.all(16.0)
           );
@@ -163,7 +163,7 @@ class _GameCabinetsState extends State<GameCabinets> {
       key: ValueKey(displayCabs),
       itemCount: displayCabs?.length,
       itemBuilder: (BuildContext context, int ind){
-        Widget item = _buildRow(displayCabs?[ind].id ?? '', displayCabs?[ind].fullTitle ?? '', displayCabs?[ind].isWorking ?? false);
+        Widget item = _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, []));
         return item;
       },
       padding: EdgeInsets.all(16.0)
@@ -171,12 +171,8 @@ class _GameCabinetsState extends State<GameCabinets> {
   }
 
   //function to build a single row widget from a string and bool
-  Widget _buildRow(String id, String name, bool working){
-    return CabinetRow(
-      id,
-      name,
-      working,
-    );
+  Widget _buildRow(Cabinet cabinet){
+    return CabinetRow(cabinet);
   }
 }
 

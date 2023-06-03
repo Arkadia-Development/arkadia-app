@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
 import 'gamecabinets.dart';
+import 'addeditcabinet.dart';
 
 class CabinetRow extends StatefulWidget {
-  String cabinetId = '';
-  String cabinetName = '';
-  bool cabinetIsWorking = true;
-  CabinetRow(String id, String name, bool isWorking){
-    cabinetId = id;
-    cabinetName = name;
-    cabinetIsWorking = isWorking;
+  Cabinet cabinet = Cabinet('', '', true, []);
+  CabinetRow(Cabinet givenCabinet){
+    cabinet = givenCabinet;
   }
 
   @override
-  _CabinetRowState createState() => _CabinetRowState(cabinetId, cabinetName, cabinetIsWorking);
+  _CabinetRowState createState() => _CabinetRowState(cabinet);
 }
 
 class _CabinetRowState extends State<CabinetRow> {
   String cabinetId = '';
   String cabinetName = '';
   bool cabinetIsWorking = true;
+  Cabinet rawCabinet = Cabinet('', '', true, []);
 
   //text stylization
   final _biggerFont = const TextStyle(fontSize: 18.0);
   
   @override
-  _CabinetRowState(String id, String name, bool isWorking){
-    cabinetId = id;
-    cabinetName = name;
-    cabinetIsWorking = isWorking;
+  _CabinetRowState(Cabinet cabinet){
+    cabinetId = cabinet.id;
+    cabinetName = cabinet.fullTitle;
+    cabinetIsWorking = cabinet.isWorking;
+    rawCabinet = cabinet;
   }
 
   @override
@@ -56,14 +55,7 @@ class _CabinetRowState extends State<CabinetRow> {
                 semanticLabel: "Edit",
               ),
               onPressed: () async {
-                cabinetIsWorking = await GameCabinetListManager.updateListItem(cabinetId)
-                  .then((bool works){
-                    setState(() {
-                      iconType = works ? Icons.check : Icons.do_not_disturb_alt;
-                      iconColor = works ? Colors.green[700] : Colors.red;
-                    });
-                    return works;
-                  });
+                Navigator.push(context, MaterialPageRoute(builder: (context) => AddEditCabinet(rawCabinet)));
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.white54),
