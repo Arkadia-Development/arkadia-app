@@ -151,7 +151,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                           bannerPath = result.files.single.path;  
                         });
                       } else {
-                        setState(() { banner = null; });
+                        setState(() { banner = null; bannerPath = null; banner64Src = null; });
                       }
                     },
                     child: Text(
