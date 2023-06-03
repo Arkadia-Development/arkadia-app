@@ -35,7 +35,12 @@ class _GameCabinetsState extends State<GameCabinets> {
       },
     );
 
-    mainWidget = _buildCabinets();
+    void stateSetter () {
+      GameCabinetListManager.filteredCabinetList = List.empty();
+      setState(() { mainWidget = _buildCabinets(stateSetter); });
+    };
+
+    mainWidget = _buildCabinets(stateSetter);
 
     //returns a scaffold object, which is like a whole screen structure
     return Scaffold(
@@ -97,8 +102,7 @@ class _GameCabinetsState extends State<GameCabinets> {
                         context,
                         MaterialPageRoute(builder: (context) => AddEditCabinet(null))
                       ).then((_) {
-                        GameCabinetListManager.filteredCabinetList = List.empty();
-                        setState(() { mainWidget = _buildCabinets(); });
+                        stateSetter();
                       });
                     },
                     style: ButtonStyle(
@@ -124,14 +128,14 @@ class _GameCabinetsState extends State<GameCabinets> {
   }
 
   // function to build the widget that contains the cabinet row objects
-  Widget _buildCabinets() {
+  Widget _buildCabinets(stateSetter) {
     //return a FutureBuilder object that contains all the cabinet info
     bool hasData = !GameCabinetListManager.filteredCabinetList.isEmpty;
     displayCabs = hasData ? GameCabinetListManager.filteredCabinetList : null;
-    return hasData ? _buildRowsFromExistingCabinets() : _getFutureBuilder();
+    return hasData ? _buildRowsFromExistingCabinets(stateSetter) : _getFutureBuilder(stateSetter);
   }
 
-  FutureBuilder _getFutureBuilder(){
+  FutureBuilder _getFutureBuilder(stateSetter){
     return FutureBuilder(
       builder: (BuildContext context, AsyncSnapshot snapshot){
         if(snapshot.connectionState == ConnectionState.waiting){
@@ -143,7 +147,7 @@ class _GameCabinetsState extends State<GameCabinets> {
           return ListView.builder(
             itemCount: displayCabs?.length,
             itemBuilder: (BuildContext context, int ind){
-              return _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, []));
+              return _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, []), stateSetter);
             },
             padding: EdgeInsets.all(16.0)
           );
@@ -157,7 +161,7 @@ class _GameCabinetsState extends State<GameCabinets> {
     );
   }
 
-  Widget _buildRowsFromExistingCabinets(){
+  Widget _buildRowsFromExistingCabinets(stateSetter){
     displayCabs = GameCabinetListManager.filteredCabinetList;
     if(displayCabs == null || (displayCabs?.isEmpty ?? true)){
       return Center(
@@ -170,7 +174,7 @@ class _GameCabinetsState extends State<GameCabinets> {
       key: ValueKey(displayCabs),
       itemCount: displayCabs?.length,
       itemBuilder: (BuildContext context, int ind){
-        Widget item = _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, []));
+        Widget item = _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, []), stateSetter);
         return item;
       },
       padding: EdgeInsets.all(16.0)
@@ -178,8 +182,8 @@ class _GameCabinetsState extends State<GameCabinets> {
   }
 
   //function to build a single row widget from a string and bool
-  Widget _buildRow(Cabinet cabinet){
-    return CabinetRow(cabinet);
+  Widget _buildRow(Cabinet cabinet, stateSetter){
+    return CabinetRow(cabinet, stateSetter);
   }
 }
 

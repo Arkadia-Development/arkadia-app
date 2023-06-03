@@ -22,6 +22,7 @@ class AddEditCabinet extends StatefulWidget {
 
 class _AddEditCabinetState extends State<AddEditCabinet> {
   bool cabinetIsNew = true;
+  String originalId = '';
 
   String title = '';
   TextField titleField = TextField();
@@ -35,6 +36,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
   _AddEditCabinetState(Cabinet? cabinet) : super() {
     if (cabinet != null) {
       cabinetIsNew = false;
+      originalId = cabinet.id;
 
       title = cabinet.fullTitle;
       _titleController = new TextEditingController(text: cabinet.fullTitle);
@@ -174,7 +176,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
               List<int> bannerBytes = banner?.readAsBytesSync() ?? [];
 
               var gameStatus = json.encode({
-                'id': searchTerms[0],
+                'id': cabinetIsNew ? searchTerms[0] : originalId,
                 'fullTitle': title,
                 'isWorking': isWorking,
                 'searchTerms': searchTerms,
@@ -212,7 +214,10 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                       );
                       Navigator.pop(context);
                     } else {
-                      Fluttertoast.showToast(msg: 'Failed to update cabinet (HTTP status ' + response.statusCode.toString() + ')');
+                      print(response.body);
+                      Fluttertoast.showToast(
+                        msg: 'Failed to update cabinet (HTTP status ' + response.statusCode.toString() + ')'
+                      );
                     }
                 });
               }

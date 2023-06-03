@@ -4,12 +4,14 @@ import 'addeditcabinet.dart';
 
 class CabinetRow extends StatefulWidget {
   Cabinet cabinet = Cabinet('', '', true, []);
-  CabinetRow(Cabinet givenCabinet){
+  final void Function() stateSetter;
+
+  CabinetRow(Cabinet givenCabinet, this.stateSetter){
     cabinet = givenCabinet;
   }
 
   @override
-  _CabinetRowState createState() => _CabinetRowState(cabinet);
+  _CabinetRowState createState() => _CabinetRowState(cabinet, stateSetter);
 }
 
 class _CabinetRowState extends State<CabinetRow> {
@@ -17,12 +19,13 @@ class _CabinetRowState extends State<CabinetRow> {
   String cabinetName = '';
   bool cabinetIsWorking = true;
   Cabinet rawCabinet = Cabinet('', '', true, []);
+  final void Function() stateSetter;
 
   //text stylization
   final _biggerFont = const TextStyle(fontSize: 18.0);
   
   @override
-  _CabinetRowState(Cabinet cabinet){
+  _CabinetRowState(Cabinet cabinet, this.stateSetter){
     cabinetId = cabinet.id;
     cabinetName = cabinet.fullTitle;
     cabinetIsWorking = cabinet.isWorking;
@@ -55,7 +58,12 @@ class _CabinetRowState extends State<CabinetRow> {
                 semanticLabel: "Edit",
               ),
               onPressed: () async {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => AddEditCabinet(rawCabinet)));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddEditCabinet(rawCabinet))
+                ).then((_) {
+                  stateSetter.call();
+                });
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.white54),
