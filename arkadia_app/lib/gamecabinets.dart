@@ -22,6 +22,7 @@ class GameCabinets extends StatefulWidget {
 class _GameCabinetsState extends State<GameCabinets> {
   TextField searchBar = TextField();
   List<Cabinet>? displayCabs = new List<Cabinet>.empty(growable: true);
+  Widget mainWidget = Text('');
 
   //default build constructor
   @override
@@ -34,7 +35,7 @@ class _GameCabinetsState extends State<GameCabinets> {
       },
     );
 
-    Widget mainWidget = _buildCabinets();
+    mainWidget = _buildCabinets();
 
     //returns a scaffold object, which is like a whole screen structure
     return Scaffold(
@@ -92,7 +93,13 @@ class _GameCabinetsState extends State<GameCabinets> {
                       semanticLabel: "Add cabinet",
                     ),
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => AddEditCabinet(null)));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AddEditCabinet(null))
+                      ).then((_) {
+                        GameCabinetListManager.filteredCabinetList = List.empty();
+                        setState(() { mainWidget = _buildCabinets(); });
+                      });
                     },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(Colors.white54),
@@ -183,7 +190,7 @@ class GameCabinetListManager {
   static List<Cabinet> filteredCabinetList = List<Cabinet>.empty(growable: true);
 
   static Future<List<Cabinet>> getCabinetList() async {
-    return await http.get(Uri.parse('http://192.168.1.70:8080/GetAllGameStatuses'))
+    return await http.get(Uri.parse(Secrets.host + '/GetAllGameStatuses'))
       .then((Response response) {
         if(response.statusCode == 200){
           List<Cabinet> list = List<Cabinet>.empty(growable: true);
@@ -202,7 +209,7 @@ class GameCabinetListManager {
   }
 
   static Future<bool> updateListItem(String cabinet) async {
-    return await http.get(Uri.parse('http://192.168.1.70:8080/SwitchGameStatus?id=' + cabinet + '&secret=' + Secrets.updateSecret))
+    return await http.get(Uri.parse(Secrets.host + '/SwitchGameStatus?id=' + cabinet + '&secret=' + Secrets.updateSecret))
       .then((Response response) async {
         return await getCabinetList()
           .then((List<Cabinet> list){

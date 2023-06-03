@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'gamecabinets.dart';
 import 'cabinetrow.dart';
 import 'secret.dart';
@@ -22,9 +23,11 @@ class AddEditCabinet extends StatefulWidget {
 class _AddEditCabinetState extends State<AddEditCabinet> {
   bool cabinetIsNew = true;
 
-  TextField title = TextField();
+  String title = '';
+  TextField titleField = TextField();
   TextEditingController _titleController = TextEditingController();
-  TextField publisher = TextField();
+  String publisher = '';
+  TextField publisherField = TextField();
   TextEditingController _publisherController = TextEditingController();
   bool isWorking = true;
   File? banner;
@@ -32,12 +35,16 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
   _AddEditCabinetState(Cabinet? cabinet) : super() {
     if (cabinet != null) {
       cabinetIsNew = false;
+
+      title = cabinet.fullTitle;
       _titleController = new TextEditingController(text: cabinet.fullTitle);
-      _publisherController = new TextEditingController(
-        text: cabinet.searchTerms.length > 0
-          ? cabinet.searchTerms[cabinet.searchTerms.length - 1].toString()
-          : ''
-      );
+
+      String lastTerm = !cabinet.searchTerms.isEmpty
+        ? cabinet.searchTerms[cabinet.searchTerms.length - 1].toString()
+        : '';
+      publisher = lastTerm;
+      _publisherController = new TextEditingController(text: lastTerm);
+
       isWorking = cabinet.isWorking;
       banner = cabinet.banner;
     } else {
@@ -46,8 +53,18 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
       _publisherController = new TextEditingController(text: '');
       isWorking = true;
     }
-    title = TextField(controller: _titleController);
-    publisher = TextField(controller: _publisherController);
+    titleField = TextField(
+      controller: _titleController,
+      onChanged: (value) {
+        setState(() { title = value; });
+      }
+    );
+    publisherField = TextField(
+      controller: _publisherController,
+      onChanged: (value) {
+        setState(() { publisher = value; });
+      }
+    );
   }
 
   @override
@@ -82,7 +99,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
           Row(
             children: [
               Expanded(flex: 5, child: SizedBox.shrink()),
-              Expanded(flex: 90, child: title),
+              Expanded(flex: 90, child: titleField),
               Expanded(flex: 5, child: SizedBox.shrink())
             ],
           ),
@@ -91,7 +108,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
           Row(
             children: [
               Expanded(flex: 5, child: SizedBox.shrink()),
-              Expanded(flex: 90, child: publisher),
+              Expanded(flex: 90, child: publisherField),
               Expanded(flex: 5, child: SizedBox.shrink())
             ],
           ),
@@ -145,6 +162,65 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
               ),
               Expanded(flex: 5, child: SizedBox.shrink())
             ],
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              List<String> searchTerms = List<String>.empty(growable: true);
+              String lowerCaseTitle = title.replaceAll(RegExp(r'[^0-9a-z\s]', caseSensitive: false), ' ').toLowerCase();
+              searchTerms.add(lowerCaseTitle.replaceAll(RegExp(r'\s'), ''));
+              lowerCaseTitle.split(' ').forEach((el) { searchTerms.add(el); });
+              searchTerms.add(publisher.replaceAll(RegExp(r'[^0-9a-z\s]', caseSensitive: false), ' ').toLowerCase());
+
+              List<int> bannerBytes = banner?.readAsBytesSync() ?? [];
+
+              var gameStatus = json.encode({
+                'id': searchTerms[0],
+                'fullTitle': title,
+                'isWorking': isWorking,
+                'searchTerms': searchTerms,
+                'banner': !bannerBytes.isEmpty ? base64Encode(bannerBytes) : null
+              });
+
+              if (cabinetIsNew) {
+                await http.post(
+                  Uri.parse(Secrets.host + '/AddGameStatus?secret=' + Secrets.updateSecret),
+                  headers: {
+                    'content-type': 'application/json'
+                  },
+                  body: gameStatus
+                ).then((Response response) {
+                    if (response.statusCode == 200) {
+                      Fluttertoast.showToast(
+                        msg: 'Cabinet added successfully!'
+                      );
+                      Navigator.pop(context);
+                    } else {
+                      Fluttertoast.showToast(msg: 'Failed to add cabinet (HTTP status ' + response.statusCode.toString() + ')');
+                    }
+                  });
+              } else {
+                await http.put(
+                  Uri.parse(Secrets.host + '/UpdateGameStatus?secret=' + Secrets.updateSecret),
+                  headers: {
+                    'content-type': 'application/json'
+                  },
+                  body: gameStatus
+                ).then((Response response) {
+                  if (response.statusCode == 200) {
+                      Fluttertoast.showToast(
+                        msg: 'Cabinet updated successfully!'
+                      );
+                      Navigator.pop(context);
+                    } else {
+                      Fluttertoast.showToast(msg: 'Failed to update cabinet (HTTP status ' + response.statusCode.toString() + ')');
+                    }
+                });
+              }
+            },
+            child: Text((cabinetIsNew ? 'Add' : 'Update') + ' Cabinet'),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all<Color>(Colors.white54)
+            )
           )
         ],
       )
