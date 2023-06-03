@@ -5,10 +5,11 @@ import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'cabinetrow.dart';
 import 'secret.dart';
+import 'addeditcabinet.dart';
 
 //stateful widget nesting within main stateless widget
 class GameCabinets extends StatefulWidget {
-  //super simple constructor; by default had Key parameters but idk what that is yet
+  //super simple constructor
   const GameCabinets() : super();
 
   //oh you want your stateful widget to do something? cool, create a state for it
@@ -19,8 +20,8 @@ class GameCabinets extends StatefulWidget {
 //you rang?
 //an underscore at the beginning of a name forces it to be private in dart
 class _GameCabinetsState extends State<GameCabinets> {
-  TextField searchBar;
-  List<Cabinet> displayCabs = new List<Cabinet>();
+  TextField searchBar = TextField();
+  List<Cabinet>? displayCabs = new List<Cabinet>.empty(growable: true);
 
   //default build constructor
   @override
@@ -90,8 +91,8 @@ class _GameCabinetsState extends State<GameCabinets> {
                       size: 18.0,
                       semanticLabel: "Add cabinet",
                     ),
-                    onPressed: () async {
-                      
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => AddEditCabinet(null)));
                     },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(Colors.white54),
@@ -118,7 +119,7 @@ class _GameCabinetsState extends State<GameCabinets> {
   // function to build the widget that contains the cabinet row objects
   Widget _buildCabinets() {
     //return a FutureBuilder object that contains all the cabinet info
-    bool hasData = GameCabinetListManager.filteredCabinetList != null;
+    bool hasData = !GameCabinetListManager.filteredCabinetList.isEmpty;
     displayCabs = hasData ? GameCabinetListManager.filteredCabinetList : null;
     return hasData ? _buildRowsFromExistingCabinets() : _getFutureBuilder();
   }
@@ -133,9 +134,9 @@ class _GameCabinetsState extends State<GameCabinets> {
         } else if(snapshot.hasData){
           displayCabs = GameCabinetListManager.filteredCabinetList;
           return ListView.builder(
-            itemCount: displayCabs.length,
+            itemCount: displayCabs?.length,
             itemBuilder: (BuildContext context, int ind){
-              return _buildRow(displayCabs[ind].id, displayCabs[ind].fullTitle, displayCabs[ind].isWorking);
+              return _buildRow(displayCabs?[ind].id ?? '', displayCabs?[ind].fullTitle ?? '', displayCabs?[ind].isWorking ?? false);
             },
             padding: EdgeInsets.all(16.0)
           );
@@ -151,7 +152,7 @@ class _GameCabinetsState extends State<GameCabinets> {
 
   Widget _buildRowsFromExistingCabinets(){
     displayCabs = GameCabinetListManager.filteredCabinetList;
-    if(displayCabs.isEmpty){
+    if(displayCabs == null || (displayCabs?.isEmpty ?? true)){
       return Center(
         child: Text(
           "No cabinets found"
@@ -160,9 +161,9 @@ class _GameCabinetsState extends State<GameCabinets> {
     }
     return ListView.builder(
       key: ValueKey(displayCabs),
-      itemCount: displayCabs.length,
+      itemCount: displayCabs?.length,
       itemBuilder: (BuildContext context, int ind){
-        Widget item = _buildRow(displayCabs[ind].id, displayCabs[ind].fullTitle, displayCabs[ind].isWorking);
+        Widget item = _buildRow(displayCabs?[ind].id ?? '', displayCabs?[ind].fullTitle ?? '', displayCabs?[ind].isWorking ?? false);
         return item;
       },
       padding: EdgeInsets.all(16.0)
@@ -182,14 +183,14 @@ class _GameCabinetsState extends State<GameCabinets> {
 class GameCabinetListManager {
   GameCabinetListManager();
 
-  static List<Cabinet> cabinetList;
-  static List<Cabinet> filteredCabinetList;
+  static List<Cabinet> cabinetList = List<Cabinet>.empty(growable: true);
+  static List<Cabinet> filteredCabinetList = List<Cabinet>.empty(growable: true);
 
   static Future<List<Cabinet>> getCabinetList() async {
     return await http.get(Uri.parse('http://192.168.1.70:8080/GetAllGameStatuses'))
       .then((Response response) {
         if(response.statusCode == 200){
-          List<Cabinet> list = List<Cabinet>();
+          List<Cabinet> list = List<Cabinet>.empty(growable: true);
           for(var cab in jsonDecode(response.body)){
             list.add(Cabinet.fromJson(cab));
           }
@@ -226,13 +227,12 @@ class GameCabinetListManager {
     filteredCabinetList = new List<Cabinet>.from(cabinetList);
     if(params.isEmpty) return filteredCabinetList;
 
-    List<bool> containsParams = new List<bool>(params.length);
+    List<bool> containsParams = new List<bool>.filled(params.length, false);
     for(Cabinet cab in cabinetList){
-      for(int i = 0; i < containsParams.length; i++) containsParams[i] = false;
-      for(int j = 0; j < params.length; j++){
+      for(int i = 0; i < params.length; i++){
         for(String term in cab.searchTerms){
-          if(term.contains(params[j].toLowerCase())){
-            containsParams[j] = true;
+          if(term.contains(params[i].toLowerCase())){
+            containsParams[i] = true;
           }
         }
       }
@@ -244,16 +244,17 @@ class GameCabinetListManager {
 }
 
 class Cabinet {
-  String id;
-  String fullTitle;
-  bool isWorking;
-  List<dynamic> searchTerms;
+  String id = '';
+  String fullTitle = '';
+  bool isWorking = true;
+  List<dynamic> searchTerms = List<String>.empty(growable: true);
+  File? banner;
 
   Cabinet(String id, String fullTitle, bool isWorking, List<dynamic> searchTerms){
     this.id = id;
     this.fullTitle = fullTitle;
     this.isWorking = isWorking;
-    List<String> termlist = List<String>();
+    List<String> termlist = List<String>.empty(growable: true);
     for(String s in searchTerms){
       termlist.add(s);
     }

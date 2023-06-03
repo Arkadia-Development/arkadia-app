@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'gamecabinets.dart';
 
 class CabinetRow extends StatefulWidget {
-  String cabinetId;
-  String cabinetName;
-  bool cabinetIsWorking;
+  String cabinetId = '';
+  String cabinetName = '';
+  bool cabinetIsWorking = true;
   CabinetRow(String id, String name, bool isWorking){
     cabinetId = id;
     cabinetName = name;
@@ -16,9 +16,9 @@ class CabinetRow extends StatefulWidget {
 }
 
 class _CabinetRowState extends State<CabinetRow> {
-  String cabinetId;
-  String cabinetName;
-  bool cabinetIsWorking;
+  String cabinetId = '';
+  String cabinetName = '';
+  bool cabinetIsWorking = true;
 
   //text stylization
   final _biggerFont = const TextStyle(fontSize: 18.0);
@@ -33,7 +33,7 @@ class _CabinetRowState extends State<CabinetRow> {
   @override
   Widget build(BuildContext context) {
     var iconType = cabinetIsWorking ? Icons.check : Icons.do_not_disturb_alt;
-    var iconColor = cabinetIsWorking ? Colors.green[800] : Colors.red;
+    var iconColor = cabinetIsWorking ? Colors.green[700] : Colors.red;
     String iconLabel = cabinetIsWorking ? "Working" : "Not Working";
     return Container(
       child: Row(
@@ -60,7 +60,7 @@ class _CabinetRowState extends State<CabinetRow> {
                   .then((bool works){
                     setState(() {
                       iconType = works ? Icons.check : Icons.do_not_disturb_alt;
-                      iconColor = works ? Colors.green[600] : Colors.red;
+                      iconColor = works ? Colors.green[700] : Colors.red;
                     });
                     return works;
                   });
@@ -86,7 +86,7 @@ class _CabinetRowState extends State<CabinetRow> {
                   .then((bool works){
                     setState(() {
                       iconType = works ? Icons.check : Icons.do_not_disturb_alt;
-                      iconColor = works ? Colors.green[600] : Colors.red;
+                      iconColor = works ? Colors.green[700] : Colors.red;
                     });
                     return works;
                   });
