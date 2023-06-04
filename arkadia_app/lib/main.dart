@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'gamecabinets.dart';
 
@@ -17,7 +15,7 @@ class ArkadiaAdministrationApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Arkadia Administration',
-      //everything inside of this ThemeData object were auto-generated and the comments may be useful later
+      //everything inside of this ThemeData object was auto-generated and the comments may be useful later
       // theme: ThemeData(
       //   // This is the theme of your application.
       //   //
