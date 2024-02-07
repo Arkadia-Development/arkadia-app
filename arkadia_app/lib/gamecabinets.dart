@@ -149,7 +149,7 @@ class _GameCabinetsState extends State<GameCabinets> {
           return ListView.builder(
             itemCount: displayCabs?.length,
             itemBuilder: (BuildContext context, int ind){
-              return _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, [], null), stateSetter);
+              return _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, [], null, null, null), stateSetter);
             },
             padding: EdgeInsets.all(16.0)
           );
@@ -176,7 +176,7 @@ class _GameCabinetsState extends State<GameCabinets> {
       key: ValueKey(displayCabs),
       itemCount: displayCabs?.length,
       itemBuilder: (BuildContext context, int ind){
-        Widget item = _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, [], null), stateSetter);
+        Widget item = _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, [], null, null, null), stateSetter);
         return item;
       },
       padding: EdgeInsets.all(16.0)
@@ -262,8 +262,10 @@ class Cabinet {
   List<dynamic> searchTerms = List<String>.empty(growable: true);
   Image? banner;
   String? bannerSrc;
+  String? notes;
+  List<String>? parts = [];
 
-  Cabinet(String id, String fullTitle, bool isWorking, List<dynamic> searchTerms, String? banner){
+  Cabinet(String id, String fullTitle, bool isWorking, List<dynamic> searchTerms, String? banner, String? notes, List<String>? parts){
     this.id = id;
     this.fullTitle = fullTitle;
     this.isWorking = isWorking;
@@ -276,9 +278,13 @@ class Cabinet {
       this.banner = Image.memory(base64Decode(banner));
       this.bannerSrc = banner;
     }
+    this.notes = notes;
+    if (parts != null) {
+      this.parts = parts;
+    }
   }
 
   factory Cabinet.fromJson(Map<String, dynamic> json){
-    return Cabinet(json['id'], json['fullTitle'], json['isWorking'], json['searchTerms'], json['banner']);
+    return Cabinet(json['id'], json['fullTitle'], json['isWorking'], json['searchTerms'], json['banner'], json['notes'], json['parts']);
   }
 }
