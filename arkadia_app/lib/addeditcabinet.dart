@@ -27,6 +27,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
   String originalId = '';
   String deleteButtonText = 'DELETE CABINET';
 
+  String mongoId = '';
   String title = '';
   TextField titleField = TextField();
   TextEditingController _titleController = TextEditingController();
@@ -43,6 +44,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
   _AddEditCabinetState(Cabinet? cabinet) : super() {
     if (cabinet != null) {
       cabinetIsNew = false;
+      mongoId = cabinet.mongoId;
       originalId = cabinet.id;
 
       title = cabinet.fullTitle;
@@ -232,13 +234,16 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                   : Uint8List.fromList([]);
 
                 var gameStatus = json.encode({
+                  'mongoId': mongoId,
                   'id': cabinetIsNew ? searchTerms[0] : originalId,
                   'fullTitle': title,
                   'isWorking': isWorking,
                   'searchTerms': searchTerms,
                   'banner': !bannerBytes.isEmpty
                     ? base64.encode(bannerBytes)
-                    : banner64Src
+                    : banner64Src,
+                  'notes': notes,
+                  'parts': parts
                 });
 
                 if (cabinetIsNew) {

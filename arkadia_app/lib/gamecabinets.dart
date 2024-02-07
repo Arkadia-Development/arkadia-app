@@ -149,7 +149,7 @@ class _GameCabinetsState extends State<GameCabinets> {
           return ListView.builder(
             itemCount: displayCabs?.length,
             itemBuilder: (BuildContext context, int ind){
-              return _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, [], null, null, null), stateSetter);
+              return _buildRow(displayCabs?[ind] ?? Cabinet('', '', '', true, [], null, null, null), stateSetter);
             },
             padding: EdgeInsets.all(16.0)
           );
@@ -176,7 +176,7 @@ class _GameCabinetsState extends State<GameCabinets> {
       key: ValueKey(displayCabs),
       itemCount: displayCabs?.length,
       itemBuilder: (BuildContext context, int ind){
-        Widget item = _buildRow(displayCabs?[ind] ?? Cabinet('', '', true, [], null, null, null), stateSetter);
+        Widget item = _buildRow(displayCabs?[ind] ?? Cabinet('', '', '', true, [], null, null, null), stateSetter);
         return item;
       },
       padding: EdgeInsets.all(16.0)
@@ -256,6 +256,7 @@ class GameCabinetListManager {
 }
 
 class Cabinet {
+  String mongoId = '';
   String id = '';
   String fullTitle = '';
   bool isWorking = true;
@@ -265,7 +266,8 @@ class Cabinet {
   String? notes;
   List<String>? parts = [];
 
-  Cabinet(String id, String fullTitle, bool isWorking, List<dynamic> searchTerms, String? banner, String? notes, List<String>? parts){
+  Cabinet(String mongoId, String id, String fullTitle, bool isWorking, List<dynamic> searchTerms, String? banner, String? notes, List<dynamic>? parts){
+    this.mongoId = mongoId;
     this.id = id;
     this.fullTitle = fullTitle;
     this.isWorking = isWorking;
@@ -279,12 +281,14 @@ class Cabinet {
       this.bannerSrc = banner;
     }
     this.notes = notes;
-    if (parts != null) {
-      this.parts = parts;
+    List<String> partsList = List<String>.empty(growable: true);
+    for (String p in (parts ?? [])) {
+      partsList.add(p);
     }
+    this.parts = partsList;
   }
 
   factory Cabinet.fromJson(Map<String, dynamic> json){
-    return Cabinet(json['id'], json['fullTitle'], json['isWorking'], json['searchTerms'], json['banner'], json['notes'], json['parts']);
+    return Cabinet(json['mongoId'], json['id'], json['fullTitle'], json['isWorking'], json['searchTerms'], json['banner'], json['notes'], json['parts']);
   }
 }
