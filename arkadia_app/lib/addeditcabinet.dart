@@ -7,6 +7,7 @@ import 'package:http/http.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'gamecabinets.dart';
+import 'notespartslist.dart';
 import 'secret.dart';
 
 // ignore: must_be_immutable
@@ -26,6 +27,7 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
   String originalId = '';
   String deleteButtonText = 'DELETE CABINET';
 
+  String mongoId = '';
   String title = '';
   TextField titleField = TextField();
   TextEditingController _titleController = TextEditingController();
@@ -36,10 +38,13 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
   Image? banner;
   String? bannerPath;
   String? banner64Src;
+  String? notes;
+  List<String>? parts = [];
 
   _AddEditCabinetState(Cabinet? cabinet) : super() {
     if (cabinet != null) {
       cabinetIsNew = false;
+      mongoId = cabinet.mongoId;
       originalId = cabinet.id;
 
       title = cabinet.fullTitle;
@@ -54,6 +59,8 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
       isWorking = cabinet.isWorking;
       banner = cabinet.banner;
       banner64Src = cabinet.bannerSrc;
+      notes = cabinet.notes;
+      parts = cabinet.parts;
     } else {
       cabinetIsNew = true;
       _titleController = new TextEditingController(text: '');
@@ -72,6 +79,13 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
         setState(() { publisher = value; });
       }
     );
+  }
+
+  void setNotesAndParts(String notes, List<String> parts) {
+    setState(() {
+      this.notes = notes;
+      this.parts = parts;
+    });
   }
 
   @override
@@ -98,7 +112,6 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
           ),
         )
       ),
-      //grabs the widget for the body from this _buildCabinets function
       body:
       SingleChildScrollView(
         child: Column(
@@ -135,6 +148,38 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.white54),
                 padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero)
               )
+            ),
+            SizedBox(width: 20, height: 40),
+            Row(
+              children: [
+                Expanded(flex: 25, child: SizedBox.shrink()),
+                Expanded(
+                  flex: 40,
+                  child: Text('Notes and Parts List')
+                ),
+                Expanded(
+                  flex: 10,
+                  child: ElevatedButton(
+                    child: Icon(
+                      Icons.edit,
+                      color: Colors.black,
+                      size: 18.0,
+                      semanticLabel: 'Edit',
+                    ),
+                    onPressed: () async {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => NotesPartsList(notes, parts, setNotesAndParts))
+                      );
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(Colors.white54),
+                      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero)
+                    )
+                  )
+                ),
+                Expanded(flex: 25, child: SizedBox.shrink())
+              ]
             ),
             SizedBox(width: 20, height: 40),
             Row(
@@ -189,13 +234,16 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                   : Uint8List.fromList([]);
 
                 var gameStatus = json.encode({
+                  'mongoId': mongoId,
                   'id': cabinetIsNew ? searchTerms[0] : originalId,
                   'fullTitle': title,
                   'isWorking': isWorking,
                   'searchTerms': searchTerms,
                   'banner': !bannerBytes.isEmpty
                     ? base64.encode(bannerBytes)
-                    : banner64Src
+                    : banner64Src,
+                  'notes': notes,
+                  'parts': parts
                 });
 
                 if (cabinetIsNew) {
@@ -254,15 +302,15 @@ class _AddEditCabinetState extends State<AddEditCabinet> {
                     Uri.parse(Secrets.host + '/DeleteGameStatus?id=' + originalId + '&secret=' + Secrets.updateSecret)
                   ).then((Response response) {
                     if (response.statusCode == 200) {
-                        Fluttertoast.showToast(
-                          msg: 'Cabinet deleted successfully'
-                        );
-                        Navigator.pop(context);
-                      } else {
-                        Fluttertoast.showToast(
-                          msg: 'Failed to delete cabinet (HTTP status ' + response.statusCode.toString() + ')'
-                        );
-                      }
+                      Fluttertoast.showToast(
+                        msg: 'Cabinet deleted successfully'
+                      );
+                      Navigator.pop(context);
+                    } else {
+                      Fluttertoast.showToast(
+                        msg: 'Failed to delete cabinet (HTTP status ' + response.statusCode.toString() + ')'
+                      );
+                    }
                   });
                 }
               },
